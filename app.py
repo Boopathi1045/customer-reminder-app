@@ -1,22 +1,24 @@
 import os
 import requests
 import streamlit as st
-import streamlit_authenticator as stauth
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
+from streamlit_authenticator import Hasher, Authenticate
 
 # Load environment variables
 load_dotenv()
-API_BASE = os.getenv("API_BASE", "https://ac3a284a-00b5-4e42-917a-b5feb1008c52-00-9bges9mc4cdd.sisko.replit.dev")
+API_BASE = os.getenv("API_BASE", "https://your-default-api-url.com")
 
 # --- User Authentication ---
 names = ["Admin"]
 usernames = ["admin"]
-passwords = ["password123"]  # You can change this
-hashed_passwords = stauth.Hasher(passwords).generate()
+passwords = ["password123"]  # change as needed
 
-authenticator = stauth.Authenticate(
+# Hash the passwords list
+hashed_passwords = Hasher(passwords).generate()
+
+authenticator = Authenticate(
     names, usernames, hashed_passwords,
     "customer_app", "auth_cookie", cookie_expiry_days=1
 )
@@ -51,9 +53,7 @@ elif authentication_status:
     st.divider()
 
     # -------- Session defaults -------------------------------------------
-    for key, val in {
-        "show_list": False, "filter_status": "All",
-        "search_query": "", "edit_idx": None}.items():
+    for key, val in {"show_list": False, "filter_status": "All", "search_query": "", "edit_idx": None}.items():
         st.session_state.setdefault(key, val)
 
     # -------- Controls ---------------------------------------------------
@@ -69,8 +69,7 @@ elif authentication_status:
     # -------- Filters ----------------------------------------------------
     f_col, s_col, c_col = st.columns([2, 3, 1])
     with f_col:
-        filt = st.selectbox("Filter", ["All", "Paid", "Unpaid"],
-                            index=["All", "Paid", "Unpaid"].index(st.session_state.filter_status))
+        filt = st.selectbox("Filter", ["All", "Paid", "Unpaid"], index=["All","Paid","Unpaid"].index(st.session_state.filter_status))
         st.session_state.filter_status = filt
     with s_col:
         st.session_state.search_query = st.text_input("🔍 Search Name", st.session_state.search_query)
@@ -104,7 +103,7 @@ elif authentication_status:
             with st.form(f"edit_form_{idx}"):
                 ename = st.text_input("Name", value=name)
                 ephone = st.text_input("Phone", value=phone)
-                estatus = st.selectbox("Status", ["paid", "not paid"], index=0 if status == "paid" else 1)
+                estatus = st.selectbox("Status", ["paid","not paid"], index=0 if status=="paid" else 1)
                 elast = st.date_input("Last Paid", value=date_or_none(last_paid) or date.today())
                 enext = st.date_input("Next Payment", value=date_or_none(next_pay) or (date.today()+relativedelta(months=1)))
                 save, cancel = st.columns(2)
@@ -131,13 +130,13 @@ elif authentication_status:
             else:
                 st.error("❌ Not Paid")
 
-            a1, a2, a3 = st.columns(3)
-            if a1.button("✏️ Edit", key=f"e{idx}"):
+            c1,c2,c3 = st.columns(3)
+            if c1.button("✏️ Edit", key=f"e{idx}"):
                 st.session_state.edit_idx = idx
                 st.rerun()
-            if a2.button("Toggle Paid", key=f"t{idx}"):
+            if c2.button("Toggle Paid", key=f"t{idx}"):
                 requests.post(f"{API_BASE}/toggle_paid", json={"name": name})
                 st.rerun()
-            if a3.button("🗑️ Del", key=f"d{idx}"):
+            if c3.button("🗑️ Del", key=f"d{idx}"):
                 requests.post(f"{API_BASE}/delete", json={"name": name})
                 st.rerun()
