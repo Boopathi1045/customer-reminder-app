@@ -4,10 +4,15 @@ import streamlit as st
 from dotenv import load_dotenv
 
 # ── ENV / CONFIG ─────────────────────────────────────────────
+# load_dotenv()
+# API_BASE = os.getenv(
+#     "API_BASE",
+#     "https://ac3a284a-00b5-4e42-917a-b5feb1008c52-00-9bges9mc4cdd.sisko.replit.dev",  # <-- swap to your URL
+# )
 load_dotenv()
 API_BASE = os.getenv(
     "API_BASE",
-    "https://ac3a284a-00b5-4e42-917a-b5feb1008c52-00-9bges9mc4cdd.sisko.replit.dev",  # <-- swap to your URL
+    "https://rboopathi1045.pythonanywhere.com",  # <-- swap to your URL
 )
 
 st.set_page_config(page_title="Customer Manager", page_icon="📋", layout="wide")
